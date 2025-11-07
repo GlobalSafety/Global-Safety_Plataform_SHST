@@ -1,4 +1,4 @@
-"use client";
+ "use client";
 
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
@@ -16,6 +16,7 @@ interface ComplianceItem {
   responsible?: string;
   lastUpdated?: string;
 }
+
 interface FormData {
   requirement: string;
   description: string;
@@ -24,9 +25,11 @@ interface FormData {
   dueDate: string;
   responsible: string;
 }
+
 export default function ConformidadePage() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  
   const [items, setItems] = useState<ComplianceItem[]>([
     {
       id: "1",
@@ -57,6 +60,15 @@ export default function ConformidadePage() {
       lastUpdated: "2025-10-15",
     },
   ]);
+
+  useEffect(() => {
+    const saved = localStorage.getItem('conformidade-items');
+    if (saved) setItems(JSON.parse(saved));
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem('conformidade-items', JSON.stringify(items));
+  }, [items]);
 
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -148,9 +160,7 @@ export default function ConformidadePage() {
   };
 
   const handleDelete = (id: string) => {
-    if (confirm("Tem a certeza que deseja eliminar este item?")) {
-      setItems(items.filter((item) => item.id !== id));
-    }
+    setItems(items.filter((item) => item.id !== id));
   };
 
   const getStatusColor = (status: string) => {
@@ -166,218 +176,203 @@ export default function ConformidadePage() {
     }
   };
 
-  const conformeCount = items.filter((i) => i.status === "Conforme").length;
-  const totalCount = items.length;
-  const conformancePercentage = Math.round((conformeCount / totalCount) * 100);
-
   return (
-    <div className="space-y-6">
-      {/* Cabeçalho */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Conformidade IGT</h1>
-          <p className="text-gray-600 mt-1">Matriz de conformidade com legislação angolana</p>
-        </div>
-        <button
-          onClick={handleAdd}
-          className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors"
-        >
-          + Novo Requisito
-        </button>
-      </div>
-
-      {/* Resumo de Conformidade */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-          <p className="text-sm text-green-600 font-medium">Conforme</p>
-          <p className="text-2xl font-bold text-green-700">{conformeCount}</p>
-        </div>
-        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-          <p className="text-sm text-yellow-600 font-medium">Em Progresso</p>
-          <p className="text-2xl font-bold text-yellow-700">
-            {items.filter((i) => i.status === "Em Progresso").length}
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold text-gray-900">Matriz de Conformidade</h1>
+          <p className="mt-2 text-lg text-gray-600">
+            Gestão de requisitos de conformidade e segurança
           </p>
         </div>
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <p className="text-sm text-blue-600 font-medium">Taxa de Conformidade</p>
-          <p className="text-2xl font-bold text-blue-700">{conformancePercentage}%</p>
-        </div>
-      </div>
 
-      {/* Barra de Progresso */}
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <p className="text-sm font-medium text-gray-700 mb-2">Progresso Geral</p>
-        <div className="w-full bg-gray-200 rounded-full h-4 overflow-hidden">
-          <div
-            className="bg-green-600 h-full transition-all duration-300"
-            style={{ width: `${conformancePercentage}%` }}
-          ></div>
+        <div className="mb-6 flex justify-between items-center">
+          <div className="flex gap-4">
+            <button
+              onClick={handleAdd}
+              className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors"
+            >
+              Adicionar Requisito
+            </button>
+          </div>
         </div>
-        <p className="text-xs text-gray-600 mt-2">
-          {conformeCount} de {totalCount} requisitos conformes
-        </p>
-      </div>
 
-      {/* Tabela de Requisitos */}
-      <div className="bg-white rounded-lg shadow-md overflow-hidden">
-        <table className="w-full">
-          <thead className="bg-gray-50 border-b border-gray-200">
-            <tr>
-              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Requisito</th>
-              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Estado</th>
-              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Responsável</th>
-              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Prazo</th>
-              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Evidência</th>
-              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Ações</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200">
-            {items.map((item) => (
-              <tr key={item.id} className="hover:bg-gray-50">
-                <td className="px-6 py-4 text-sm font-medium text-gray-900">{item.requirement}</td>
-                <td className="px-6 py-4 text-sm">
-                  <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(item.status)}`}>
-                    {item.status}
-                  </span>
-                </td>
-                <td className="px-6 py-4 text-sm text-gray-600">{item.responsible || "-"}</td>
-                <td className="px-6 py-4 text-sm text-gray-600">{item.dueDate}</td>
-                <td className="px-6 py-4 text-sm">
-                  {item.evidence ? (
-                    <span className="text-blue-600 hover:text-blue-800 cursor-pointer font-medium">
-                      📎 {item.evidence}
+        <div className="grid gap-6">
+          {items.map((item) => (
+            <div
+              key={item.id}
+              className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow"
+            >
+              <div className="flex justify-between items-start">
+                <div className="flex-1">
+                  <div className="flex items-center gap-3 mb-2">
+                    <h3 className="text-lg font-semibold text-gray-900">
+                      {item.requirement}
+                    </h3>
+                    <span
+                      className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
+                        item.status
+                      )}`}
+                    >
+                      {item.status}
                     </span>
-                  ) : (
-                    <span className="text-gray-400">-</span>
-                  )}
-                </td>
-                <td className="px-6 py-4 text-sm space-x-2">
+                  </div>
+                  <p className="text-gray-600 mb-3">{item.description}</p>
+                  
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <span className="font-medium text-gray-700">Prazo:</span>
+                      <span className="ml-2 text-gray-900">{item.dueDate}</span>
+                    </div>
+                    <div>
+                      <span className="font-medium text-gray-700">Responsável:</span>
+                      <span className="ml-2 text-gray-900">{item.responsible}</span>
+                    </div>
+                    {item.evidence && (
+                      <div className="col-span-2">
+                        <span className="font-medium text-gray-700">Evidência:</span>
+                        <span className="ml-2 text-blue-600 hover:text-blue-800 cursor-pointer">
+                          {item.evidence}
+                        </span>
+                      </div>
+                    )}
+                    {item.lastUpdated && (
+                      <div>
+                        <span className="font-medium text-gray-700">Atualizado:</span>
+                        <span className="ml-2 text-gray-900">{item.lastUpdated}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex gap-2 ml-4">
                   <button
                     onClick={() => handleEdit(item)}
-                    className="text-blue-600 hover:text-blue-800 font-medium"
+                    className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm transition-colors"
                   >
                     Editar
                   </button>
                   <button
                     onClick={() => handleDelete(item.id)}
-                    className="text-red-600 hover:text-red-800 font-medium"
+                    className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white rounded text-sm transition-colors"
                   >
                     Eliminar
                   </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Formulário Modal */}
-      {showForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">
-              {editingId ? "Editar Requisito" : "Novo Requisito"}
-            </h2>
-
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Requisito *
-                </label>
-                <input
-                  type="text"
-                  value={formData.requirement}
-                  onChange={(e) => setFormData({ ...formData, requirement: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none"
-                  placeholder="Ex: ASO - Avaliação de Saúde Ocupacional"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Descrição
-                </label>
-                <textarea
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none"
-                  placeholder="Descrição detalhada do requisito"
-                  rows={3}
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Estado
-                  </label>
-                  <select
-                    value={formData.status}
-                    onChange={(e) => setFormData({ ...formData, status: e.target.value as any })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none"
-                  >
-                    <option>Conforme</option>
-                    <option>Em Progresso</option>
-                    <option>Não Conforme</option>
-                  </select>
                 </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Responsável
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.responsible}
-                    onChange={(e) => setFormData({ ...formData, responsible: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none"
-                    placeholder="Ex: Técnico SHST"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Prazo *
-                </label>
-                <input
-                  type="date"
-                  value={formData.dueDate}
-                  onChange={(e) => setFormData({ ...formData, dueDate: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Ficheiro de Evidência
-                </label>
-                <FileUpload
-                  onFileSelect={handleFileSelect}
-                  maxSize={10 * 1024 * 1024}
-                  allowedTypes={["application/pdf", "image/jpeg", "image/png", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"]}
-                  label=""
-                />
               </div>
             </div>
+          ))}
+        </div>
 
-            <div className="flex gap-3 mt-6">
-              <button
-                onClick={() => setShowForm(false)}
-                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium transition-colors"
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={handleSave}
-                className="flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors"
-              >
-                Guardar
-              </button>
+        {showForm && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+              <div className="p-6">
+                <h2 className="text-2xl font-bold mb-6">
+                  {editingId ? "Editar Requisito" : "Adicionar Requisito"}
+                </h2>
+
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Requisito *
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.requirement}
+                      onChange={(e) => setFormData({ ...formData, requirement: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none"
+                      placeholder="Ex: ASO - Avaliação de Saúde Ocupacional"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Descrição
+                    </label>
+                    <textarea
+                      value={formData.description}
+                      onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none"
+                      placeholder="Descrição detalhada do requisito"
+                      rows={3}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Status
+                    </label>
+                    <select
+                      value={formData.status}
+                      onChange={(e) => setFormData({ ...formData, status: e.target.value as any })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none"
+                    >
+                      <option>Conforme</option>
+                      <option>Em Progresso</option>
+                      <option>Não Conforme</option>
+                    </select>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Responsável
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.responsible}
+                        onChange={(e) => setFormData({ ...formData, responsible: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none"
+                        placeholder="Ex: Técnico SHST"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Prazo *
+                      </label>
+                      <input
+                        type="date"
+                        value={formData.dueDate}
+                        onChange={(e) => setFormData({ ...formData, dueDate: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Evidência/Documento
+                    </label>
+                    <FileUpload onFileSelect={handleFileSelect} />
+                    {selectedFile && (
+                      <p className="mt-2 text-sm text-gray-600">
+                        Arquivo selecionado: {selectedFile.name}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex gap-3 mt-8">
+                  <button
+                    onClick={handleSave}
+                    className="flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors"
+                  >
+                    Guardar
+                  </button>
+                  <button
+                    onClick={() => setShowForm(false)}
+                    className="flex-1 px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg font-medium transition-colors"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }
