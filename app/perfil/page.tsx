@@ -37,6 +37,11 @@ export default function PerfilPage() {
     alert("Perfil atualizado com sucesso!");
   };
 
+  const handlePasswordChange = () => {
+    console.log("✅ Botão clicado!");
+    alert("Funcionalidade de alteração de password em desenvolvimento!");
+  };
+
   return (
     <div className="max-w-2xl mx-auto space-y-6">
       {/* Cabeçalho */}
@@ -123,7 +128,7 @@ export default function PerfilPage() {
           </div>
         </div>
 
-        <button
+        <button 
           onClick={handleSave}
           className="mt-6 px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors"
         >
@@ -170,7 +175,10 @@ export default function PerfilPage() {
           </div>
         </div>
 
-        <button className="mt-6 px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors">
+        <button 
+          onClick={handlePasswordChange}
+          className="mt-6 px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+        >
           Atualizar Palavra-passe
         </button>
       </div>
