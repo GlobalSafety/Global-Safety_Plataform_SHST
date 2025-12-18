@@ -13,3 +13,5 @@ type
 Thumbs.db
 *.log
 .vscode/
+"!!token" 
+"app/generated/" 
