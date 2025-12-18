@@ -14,13 +14,16 @@ const requisitos: Requisito[] = [
 ];
 
 export default function MatrizConformidadePage() {
-  const filtros = { categoria: "Segurança" };
+  const categoriaFiltro = "Segurança"; // Se quiser dinâmico, use useState
 
   const requisitosFiltrados = useMemo(() => {
+    // Objeto filtros movido para DENTRO do useMemo
+    const filtros = { categoria: categoriaFiltro };
+    
     return requisitos.filter(
       (req) => req.categoria === filtros.categoria
     );
-  }, [filtros]);
+  }, [categoriaFiltro]); // Apenas categoriaFiltro como dependência
 
   return (
     <div className="p-6">
