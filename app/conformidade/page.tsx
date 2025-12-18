@@ -1,4 +1,4 @@
- "use client";
+"use client";
 
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
@@ -26,48 +26,65 @@ interface FormData {
   responsible: string;
 }
 
+// Tipo helper para o status
+type StatusType = "Conforme" | "Não Conforme" | "Em Progresso";
+
 export default function ConformidadePage() {
-  const { data: session, status } = useSession();
+  const { status } = useSession(); // Removido 'session' não utilizado
   const router = useRouter();
   
-  const [items, setItems] = useState<ComplianceItem[]>([
-    {
-      id: "1",
-      requirement: "ASO - Avaliação de Saúde Ocupacional",
-      description: "Todos os trabalhadores devem ter ASO atualizado",
-      status: "Conforme",
-      evidence: "ASO_2025.pdf",
-      dueDate: "2025-12-31",
-      responsible: "Técnico SHST",
-      lastUpdated: "2025-10-26",
-    },
-    {
-      id: "2",
-      requirement: "Formação em Segurança",
-      description: "Formação inicial e contínua em segurança",
-      status: "Em Progresso",
-      dueDate: "2025-11-30",
-      responsible: "Gestor de Projeto",
-      lastUpdated: "2025-10-20",
-    },
-    {
-      id: "3",
-      requirement: "EPIs - Equipamentos de Proteção Individual",
-      description: "Fornecimento e manutenção de EPIs",
-      status: "Não Conforme",
-      dueDate: "2025-10-31",
-      responsible: "Contratada",
-      lastUpdated: "2025-10-15",
-    },
-  ]);
+  // ✅ CORRIGIDO: useState com inicializador em vez de useEffect
+  const [items, setItems] = useState<ComplianceItem[]>(() => {
+    if (typeof window === 'undefined') {
+      return [];
+    }
 
-  useEffect(() => {
     const saved = localStorage.getItem('conformidade-items');
-    if (saved) setItems(JSON.parse(saved));
-  }, []);
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch {
+        return [];
+      }
+    }
 
+    return [
+      {
+        id: "1",
+        requirement: "ASO - Avaliação de Saúde Ocupacional",
+        description: "Todos os trabalhadores devem ter ASO atualizado",
+        status: "Conforme",
+        evidence: "ASO_2025.pdf",
+        dueDate: "2025-12-31",
+        responsible: "Técnico SHST",
+        lastUpdated: "2025-10-26",
+      },
+      {
+        id: "2",
+        requirement: "Formação em Segurança",
+        description: "Formação inicial e contínua em segurança",
+        status: "Em Progresso",
+        dueDate: "2025-11-30",
+        responsible: "Gestor de Projeto",
+        lastUpdated: "2025-10-20",
+      },
+      {
+        id: "3",
+        requirement: "EPIs - Equipamentos de Proteção Individual",
+        description: "Fornecimento e manutenção de EPIs",
+        status: "Não Conforme",
+        dueDate: "2025-10-31",
+        responsible: "Contratada",
+        lastUpdated: "2025-10-15",
+      },
+    ];
+  });
+
+  // ✅ CORRIGIDO: Apenas sincroniza com localStorage quando items mudar
   useEffect(() => {
-    localStorage.setItem('conformidade-items', JSON.stringify(items));
+    if (items.length > 0) {
+      localStorage.setItem('conformidade-items', JSON.stringify(items));
+    }
   }, [items]);
 
   const [showForm, setShowForm] = useState(false);
@@ -305,7 +322,10 @@ export default function ConformidadePage() {
                     </label>
                     <select
                       value={formData.status}
-                      onChange={(e) => setFormData({ ...formData, status: e.target.value as any })}
+                      onChange={(e) => setFormData({ 
+                        ...formData, 
+                        status: e.target.value as StatusType // ✅ CORRIGIDO: sem 'any'
+                      })}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none"
                     >
                       <option>Conforme</option>
