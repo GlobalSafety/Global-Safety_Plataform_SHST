@@ -9,9 +9,7 @@ export default function ConsentBanner() {
   useEffect(() => {
     // Verificar se o utilizador já consentiu
     const hasConsented = localStorage.getItem("privacy_consent");
-    if (!hasConsented) {
-      setShowBanner(true);
-    }
+    setShowBanner(!hasConsented);
   }, []);
 
   const handleAccept = () => {
