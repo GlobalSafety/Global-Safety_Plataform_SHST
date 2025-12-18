@@ -1,0 +1,6 @@
+{ 
+  "installCommand": "pnpm install --unsafe-perm", 
+  "buildCommand": "pnpm run build", 
+  "devCommand": "pnpm run dev", 
+  "framework": "nextjs" 
+} 
