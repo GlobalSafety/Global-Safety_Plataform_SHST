@@ -1,14 +1,8 @@
-import type { AuthOptions } from "next-auth";
+// lib/auth.ts
+import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 
-type UserWithRole = {
-  id: string;
-  name: string;
-  email: string;
-  role: "Admin" | "User";
-};
-
-export const authOptions: AuthOptions = {
+export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
       name: "Credentials",
@@ -21,45 +15,58 @@ export const authOptions: AuthOptions = {
           return null;
         }
 
-        // 🔐 EXEMPLO FIXO (trocar depois por BD)
+        // Login de teste - SUBSTITUIR por validação real no banco
         if (
           credentials.email === "admin@globalsafety.com" &&
           credentials.password === "admin123"
         ) {
-          const user: UserWithRole = {
+          return {
             id: "1",
             name: "Administrador",
             email: credentials.email,
+            image: null,
             role: "Admin",
           };
+        }
 
-          return user;
+        if (
+          credentials.email === "user@globalsafety.com" &&
+          credentials.password === "user123"
+        ) {
+          return {
+            id: "2",
+            name: "Usuário",
+            email: credentials.email,
+            image: null,
+            role: "User",
+          };
         }
 
         return null;
       },
     }),
   ],
-
   session: {
     strategy: "jwt",
   },
-
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.role = (user as UserWithRole).role;
+        token.id = user.id;
+        token.role = user.role;
       }
       return token;
     },
-
     async session({ session, token }) {
       if (session.user) {
-        session.user.role = token.role as "Admin" | "User";
+        session.user.id = token.id as string;
+        session.user.role = token.role as string;
       }
       return session;
     },
   },
-
+  pages: {
+    signIn: "/login",
+  },
   secret: process.env.NEXTAUTH_SECRET,
 };

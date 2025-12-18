@@ -16,16 +16,20 @@ export default function ConsentBanner() {
   if (!showBanner) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 w-full bg-gray-900 text-white p-4 flex justify-between items-center z-50">
-      <p className="text-sm">
-        Este site utiliza cookies para melhorar a experiência do utilizador.
-      </p>
-      <button
-        onClick={handleAccept}
-        className="bg-blue-600 px-4 py-2 rounded text-sm hover:bg-blue-700"
-      >
-        Aceitar
-      </button>
+    <div className="fixed bottom-0 left-0 right-0 bg-gray-900 text-white p-4 z-50">
+      <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+        <p className="text-sm">
+          Utilizamos cookies para melhorar a sua experiência. Ao continuar,
+          aceita a nossa política de privacidade.
+        </p>
+
+        <button
+          onClick={handleAccept}
+          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
+        >
+          Aceitar
+        </button>
+      </div>
     </div>
   );
 }

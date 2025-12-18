@@ -7,7 +7,7 @@ export default function PrivacyPolicyPage() {
         <section>
           <h2 className="text-2xl font-bold text-gray-900 mb-4">1. Introdução</h2>
           <p>
-            A Global Safety Angola ("Empresa") está comprometida em proteger a privacidade dos seus utilizadores. Esta Política de Privacidade explica como recolhemos, utilizamos, divulgamos e protegemos os seus dados pessoais.
+            A Global Safety Angola (&quot;Empresa&quot;) está comprometida em proteger a privacidade dos seus utilizadores. Esta Política de Privacidade explica como recolhemos, utilizamos, divulgamos e protegemos os seus dados pessoais.
           </p>
         </section>
 
