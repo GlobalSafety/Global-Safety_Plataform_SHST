@@ -1,7 +1,6 @@
 {
-    "installCommand": "pnpm install",
-    "buildCommand": "npx prisma generate && pnpm run build",
-    "devCommand": "pnpm run dev",
-    "framework": "nextjs"
-  }
-  
+  "installCommand": "pnpm install",
+  "buildCommand": "next build",
+  "devCommand": "pnpm run dev",
+  "framework": "nextjs"
+}
